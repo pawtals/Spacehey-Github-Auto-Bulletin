@@ -1,1 +1,3 @@
-import { firefox } from "playwright";
+import prompts from "prompts";
+console.clear();
+
