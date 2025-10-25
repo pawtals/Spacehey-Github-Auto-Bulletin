@@ -21,3 +21,5 @@ class Markdown {
         return this.mainString;
     }
 }
+
+export default Markdown;

@@ -44,3 +44,5 @@ class AuthPopup {
         }
     }
 }
+
+export default AuthPopup;
