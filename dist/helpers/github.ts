@@ -1,6 +1,6 @@
 import axios from "axios";
 import { join } from "path";
-const sessionsDir = join(process.cwd(), 'sessions');
+const sessionsDir = join(process.cwd(), 'session');
 
 /**
  * Spinner utility for loading indicators

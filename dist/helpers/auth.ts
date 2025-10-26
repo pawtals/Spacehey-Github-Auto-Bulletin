@@ -2,7 +2,7 @@ import { firefox, type BrowserContext, type Page, type Response } from "playwrig
 import { access, mkdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 
-const sessionsDir = join(process.cwd(), 'sessions');
+const sessionsDir = join(process.cwd(), 'session');
 
 class AuthPopup {
     private session: BrowserContext | undefined;

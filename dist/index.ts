@@ -1,7 +1,6 @@
 import prompts from "prompts";
 import Github from "./helpers/github.js";
-console.clear();
+import Spacehey from "./helpers/spacehey-interface.js";
+import AuthPopup from "./helpers/auth.js";
 
-await Github.IssueHistory({
-    user: "pawtals",
-});
+new Spacehey();
