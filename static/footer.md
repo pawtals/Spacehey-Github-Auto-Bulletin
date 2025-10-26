@@ -1,1 +1,4 @@
-auto generated bulletin
+---
+> {{randquote}}
+{{randimg}}
+*auto generated bulletin*

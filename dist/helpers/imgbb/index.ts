@@ -1,6 +1,7 @@
-import { access } from "fs/promises";
+import { access, writeFile, readFile } from "fs/promises";
 import { join, extname, isAbsolute, basename } from "path";
 import { uploadImage as imgbbUpload } from "./uploader.js";
+import prompts from "prompts";
 
 interface ImageUploadResult {
     originalPath: string;
@@ -11,9 +12,79 @@ interface ImageUploadResult {
 class ImgbbHelper {
     private apiKey: string;
     private readonly imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'];
+    private static readonly SESSION_FILE = join(process.cwd(), 'session', 'imgbb.txt');
 
     constructor(apiKey: string) {
         this.apiKey = apiKey;
+    }
+
+    /**
+     * Prompts user for imgbb API key and saves it to session/imgbb.txt
+     * @returns The API key entered by the user
+     */
+    public static async PromptForApiKey(): Promise<string> {
+        const response = await prompts({
+            type: 'text',
+            name: 'apiKey',
+            message: 'Enter your imgbb API key:',
+            validate: (value: string) => value.length > 0 ? true : 'API key cannot be empty'
+        });
+
+        if (!response.apiKey) {
+            throw new Error('API key is required');
+        }
+
+        // Save to session file
+        await writeFile(this.SESSION_FILE, response.apiKey, 'utf-8');
+        console.log(`✓ API key saved to ${this.SESSION_FILE}`);
+
+        return response.apiKey;
+    }
+
+    /**
+     * Reads the API key from session/imgbb.txt
+     * @returns The API key or null if file doesn't exist
+     */
+    public static async GetSavedApiKey(): Promise<string | null> {
+        try {
+            await access(this.SESSION_FILE);
+            const apiKey = await readFile(this.SESSION_FILE, 'utf-8');
+            return apiKey.trim();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Clears the saved API key
+     */
+    public static async ClearApiKey(): Promise<void> {
+        try {
+            await access(this.SESSION_FILE);
+            await writeFile(this.SESSION_FILE, '', 'utf-8');
+            console.log('✓ Cleared saved API key');
+        } catch (e) {
+            // File doesn't exist, nothing to clear
+        }
+    }
+
+    /**
+     * Gets API key from session file or prompts user if not found
+     * @param forcePrompt - If true, always prompts for new key
+     * @returns The API key
+     */
+    public static async GetOrPromptApiKey(forcePrompt: boolean = false): Promise<string> {
+        if (!forcePrompt) {
+            const savedKey = await this.GetSavedApiKey();
+
+            if (savedKey) {
+                console.log('✓ Using saved imgbb API key');
+                return savedKey;
+            }
+        }
+
+        console.log('No saved API key found');
+        return await this.PromptForApiKey();
     }
 
     /**
