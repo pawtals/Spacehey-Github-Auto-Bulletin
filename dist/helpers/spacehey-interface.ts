@@ -19,12 +19,14 @@ class Spacehey {
     /**
      * Posts form data to https://spacehey.com/createbulletin as a logged in user.
      */
-    public async PostBulletin(content: string) {
+    public async PostBulletin({ title, content, duration, comments, cssref }: {title: string, content: string, duration: "1d" | "5d" | "10d", comments: "enabled" | "disabled", cssref: string | undefined}) {
+        if (cssref) content = content.concat(`<style>@import url("${cssref}")</style>`) // todo move to my server's static files
+        else content = content.concat(`<style>@import url("")</style>`);
         const formData = new URLSearchParams({
-            subject: "GAB TEST MD",
+            subject: title,
             content: content,
-            duration: "5d",
-            comments: "enabled",
+            duration: duration,
+            comments: comments,
             submit: ''
         });
 
