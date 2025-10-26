@@ -5,9 +5,49 @@ const sessionsDir = join(process.cwd(), 'session');
 
 class Spacehey {
     private cookies: string | undefined;
-    constructor() {
+    private constructor() {
         this.cookies;
-        if (!this.AuthCheck()) throw new Error("Cookies for account are either expired or don't exist.");
+    }
+
+    static async create() {
+        const instance = new Spacehey();
+        const isAuthed = await instance.AuthCheck();
+        if (!isAuthed) throw new Error("Cookies for account are either expired or don't exist.");
+        return instance;
+    }
+
+    /**
+     * Posts form data to https://spacehey.com/createbulletin as a logged in user.
+     */
+    public async PostBulletin(content: string) {
+        const formData = new URLSearchParams({
+            subject: "GAB TEST MD",
+            content: content,
+            duration: "5d",
+            comments: "enabled",
+            submit: ''
+        });
+
+        try {
+            const response = await axios.post('https://spacehey.com/createbulletin', formData.toString(), {
+                headers: {
+                    'Cookie': this.cookies,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                maxRedirects: 0,
+                validateStatus: (status) => status < 400
+            });
+            return response.data;
+        } catch(e: any) {
+            if (e.response) {
+                if (e.response.status === 302) {
+                    const redirectUrl = e.response.headers.location || 'No location header found';
+                    console.log(`302 Redirect detected. Redirection URL: ${redirectUrl}`);
+                }
+                throw new Error(`failed to post bulletin: ${e.response.status} - ${e.response.statusText}`);
+            }
+            throw new Error(`failed to post bulletin: ${e.message}`);
+        }
     }
 
     /**
@@ -17,7 +57,7 @@ class Spacehey {
     private async AuthCheck(): Promise<boolean> {
         try {
             await access(sessionsDir + "/auth.txt");
-            this.cookies = (await readFile(sessionsDir + "/auth.txt")).toString();
+            this.cookies = (await readFile(sessionsDir + "/auth.txt")).toString().trim();
         } catch(e) {
             console.error("headers for axios do not exist, please login")
             return false;

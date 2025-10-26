@@ -33,7 +33,7 @@ class AuthPopup {
 
         const authorization = cookies
             .map(c => `${c.name}=${c.value}`)
-            .join('; ');
+            .join(';');
 
         try {
             await access(sessionsDir + "/auth.txt"); // should error if project is new
