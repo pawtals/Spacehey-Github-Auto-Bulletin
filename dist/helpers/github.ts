@@ -37,7 +37,7 @@ class Spinner {
 }
 
 /**
- * Wrapper to execute async functions with a spinner
+ * wrapper to execute async functions with a spinner
  */
 async function withSpinner<T>(message: string, fn: () => Promise<T>): Promise<T> {
     const spinner = new Spinner(message);
@@ -66,10 +66,12 @@ class Github {
             for (let i in query) {
                 const item = query[i];
                 if (commitsAdded >= max || !DateCheck(item.commit.author.date)) break;
+                mdChunks.push('<div class="gab-commit">');
                 let md = `### \`${sanitizeString(item.commit.message)}\` at \`${sanitizeString(item.repository.full_name)}\``;
                 mdChunks.push(md);
                 const [d, t] = ToSplitTime(new Date(item.commit.author.date));
                 mdChunks.push(`Committed \`${d} at ${t} UTC\` [\`SHA: ${item.sha}\`](${item.html_url})`);
+                mdChunks.push('</div>')
                 commitsAdded++;
             }
             if (commitsAdded === 0) mdChunks[0] = "";
@@ -89,6 +91,7 @@ class Github {
                 const item = query[i];
                 if (issuesAdded >= max || !DateCheck(item.updated_at)) break;
                 const repo_name = (await axios.get(query[0].repository_url)).data.full_name;
+                mdChunks.push('<div class="gab-commit">');
                 let md = `### ${item.author_association} ${name} at \`${repo_name}\``;
                 mdChunks.push(md);
                 {
@@ -102,6 +105,7 @@ class Github {
                 if (item.body != null) mdChunks.push(`${item.body}`);
                 mdChunks.push(`<div class="gab-issue-status">${item.state}</div>`);
                 mdChunks.push(`Comments: \`${item.comments}\``);
+                mdChunks.push('</div>')
                 issuesAdded++;
             }
             return mdChunks;
@@ -121,6 +125,7 @@ class Github {
                 if (issuesAdded >= max || !DateCheck(item.updated_at)) break;
                 const repo_name = (await axios.get(query[0].repository_url)).data.full_name;
                 let md = `### ${item.author_association} ${name} at \`${repo_name}\``;
+                mdChunks.push('<div class="gab-commit">');
                 mdChunks.push(md);
                 {
                     const [d, t] = ToSplitTime(new Date(item.updated_at));
@@ -133,6 +138,7 @@ class Github {
                 if (item.body != null) mdChunks.push(`${item.body}`);
                 mdChunks.push(`<div class="gab-issue-status">${item.state}</div>`);
                 mdChunks.push(`Comments: \`${item.comments}\``);
+                mdChunks.push('</div>')
                 issuesAdded++;
             }
             return mdChunks;
