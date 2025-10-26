@@ -19,9 +19,12 @@ class Spacehey {
     /**
      * Posts form data to https://spacehey.com/createbulletin as a logged in user.
      */
-    public async PostBulletin({ title, content, duration, comments, cssref }: {title: string, content: string, duration: "1d" | "5d" | "10d", comments: "enabled" | "disabled", cssref: string | undefined}) {
-        if (cssref) content = content.concat(`<style>@import url("${cssref}")</style>`) // todo move to my server's static files
-        else content = content.concat(`<style>@import url("")</style>`);
+    public async PostBulletin({ title, content, duration = "10d", comments = "enabled", cssref }: {title: string, content: string, duration?: "1d" | "5d" | "10d", comments?: "enabled" | "disabled", cssref?: string}) {
+        if (cssref) content = content.concat(`<style>@import url("${cssref}")</style>`); // todo move to my server's static files
+        else {
+            const css = (await readFile(join(process.cwd() + "/static/gab.css"))).toString().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+            content = content.concat(`<style>${css}</style>`);
+        }
         const formData = new URLSearchParams({
             subject: title,
             content: content,
@@ -74,7 +77,7 @@ class Spacehey {
             if (bulletinCheck.status !== 200) throw new Error("Unhandled status, check for server issues with https://spacehey.com")
         } catch(e: any) {
             if (e.response && e.response.status === 302) throw new Error("302 redirect unauthorized, please check your authorization.");
-            else throw new Error("Unhandled response:", e)
+            else throw new Error(`Unhandled response, check spacehey server status ${e}`)
         }
         return true;
     }

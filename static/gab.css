@@ -1,0 +1,3 @@
+/* THIS IS THE CSS YOUR BULLETIN IS APPENDED WITH BY DEFAULT, YOU CAN CHANGE GAB TO POINT TO A FILE ONLINE VIA AN SRC URL OR MANUALLY CHANGE THIS */
+/* CSS WAS WRITTEN BY pawtals/mochacup */
+.gab-commit {background: var(--gray); padding: 0.5rem;} .gab-commit > * {margin: 0;} h2 {margin: 0;} .gab-commit img {width: auto; height: auto;} .gab-issue-status {background: var(--darker-blue); color: white; display: inline}

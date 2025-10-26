@@ -1,11 +1,13 @@
-import MarkdownIt from "markdown-it/index.js";
+import MarkdownIt from "markdown-it";
 
 class Markdown {
     private markdown: MarkdownIt;
     private mainString: string;
     constructor() {
         this.mainString = "";
-        this.markdown = new MarkdownIt();
+        this.markdown = new MarkdownIt({
+            html: true // Enable HTML tags in source
+        });
     }
 
     public AddLine(line: string) {

@@ -7,3 +7,5 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 session/
+static/images/*
+static/text/*

@@ -61,17 +61,13 @@ class Github {
             if (!per_page) per_page = 20;
             if (!max) max = 3;
             const query = (await axios.get(`https://api.github.com/search/commits?q=author:${user} sort:committer-date&per_page=${per_page}&order=desc`)).data.items;
-            const mdChunks: Array<string> = [`## ${sanitizeString(query[0].commit.author.name)}'s recent commits`];
+            const mdChunks: Array<string> = [`<h2>${sanitizeString(query[0].commit.author.name)}'s recent commits</h2>`];
             let commitsAdded = 0;
             for (let i in query) {
                 const item = query[i];
                 if (commitsAdded >= max || !DateCheck(item.commit.author.date)) break;
-                mdChunks.push('<div class="gab-commit">');
-                let md = `### \`${sanitizeString(item.commit.message)}\` at \`${sanitizeString(item.repository.full_name)}\``;
-                mdChunks.push(md);
                 const [d, t] = ToSplitTime(new Date(item.commit.author.date));
-                mdChunks.push(`Committed \`${d} at ${t} UTC\` [\`SHA: ${item.sha}\`](${item.html_url})`);
-                mdChunks.push('</div>')
+                mdChunks.push(`<div class="gab-commit"><h3><code>${sanitizeString(item.commit.message)}</code> at <code>${sanitizeString(item.repository.full_name)}</code></h3><p>Committed <code>${d} at ${t} UTC</code> <a href="${item.html_url}"><code>SHA: ${item.sha}</code></a></p></div>`);
                 commitsAdded++;
             }
             if (commitsAdded === 0) mdChunks[0] = "";
@@ -85,27 +81,16 @@ class Github {
             if (!max) max = 3;
             const query = (await axios.get(`https://api.github.com/search/issues?q=author:${user} is:issue sort:created&per_page=${per_page}&order=desc`)).data.items;
             const name = (await axios.get(query[0].user.url)).data.name;
-            const mdChunks: Array<string> = [`## ${name}'s recent issues`];
+            const mdChunks: Array<string> = [`<h2>${name}'s recent issues</h2>`];
             let issuesAdded = 0;
             for (let i in query) {
                 const item = query[i];
                 if (issuesAdded >= max || !DateCheck(item.updated_at)) break;
                 const repo_name = (await axios.get(query[0].repository_url)).data.full_name;
-                mdChunks.push('<div class="gab-commit">');
-                let md = `### ${item.author_association} ${name} at \`${repo_name}\``;
-                mdChunks.push(md);
-                {
-                    const [d, t] = ToSplitTime(new Date(item.updated_at));
-                    mdChunks.push(`Issue updated \`${d} at ${t} UTC\` [\`ID: ${item.id}\`](${item.html_url})`);
-                }
-                {
-                    const [d, t] = ToSplitTime(new Date(item.updated_at));
-                    mdChunks.push(`#### ${item.title} | Created at: \`${d} at ${t} UTC\``);
-                }
-                if (item.body != null) mdChunks.push(`${item.body}`);
-                mdChunks.push(`<div class="gab-issue-status">${item.state}</div>`);
-                mdChunks.push(`Comments: \`${item.comments}\``);
-                mdChunks.push('</div>')
+                const [d, t] = ToSplitTime(new Date(item.updated_at));
+                const [cd, ct] = ToSplitTime(new Date(item.created_at));
+                const bodyHtml = item.body ? `<p>${sanitizeString(item.body)}</p>` : '';
+                mdChunks.push(`<div class="gab-commit"><h3>${item.author_association} ${name} at <code>${repo_name}</code></h3><p>Issue updated <code>${d} at ${t} UTC</code> <a href="${item.html_url}"><code>ID: ${item.id}</code></a></p><h4>${sanitizeString(item.title)} | Created at: <code>${cd} at ${ct} UTC</code></h4>${bodyHtml}<div class="gab-issue-status">${item.state}</div><p>Comments: <code>${item.comments}</code></p></div>`);
                 issuesAdded++;
             }
             return mdChunks;
@@ -118,27 +103,16 @@ class Github {
             if (!max) max = 3;
             const query = (await axios.get(`https://api.github.com/search/issues?q=author:${user} is:pr sort:created&per_page=${per_page}&order=desc`)).data.items;
             const name = (await axios.get(query[0].user.url)).data.name;
-            const mdChunks: Array<string> = [`## ${name}'s recent pull requests`];
+            const mdChunks: Array<string> = [`<h2>${name}'s recent pull requests</h2>`];
             let issuesAdded = 0;
             for (let i in query) {
                 const item = query[i];
                 if (issuesAdded >= max || !DateCheck(item.updated_at)) break;
                 const repo_name = (await axios.get(query[0].repository_url)).data.full_name;
-                let md = `### ${item.author_association} ${name} at \`${repo_name}\``;
-                mdChunks.push('<div class="gab-commit">');
-                mdChunks.push(md);
-                {
-                    const [d, t] = ToSplitTime(new Date(item.updated_at));
-                    mdChunks.push(`Issue updated \`${d} at ${t} UTC\` [\`ID: ${item.id}\`](${item.html_url})`);
-                }
-                {
-                    const [d, t] = ToSplitTime(new Date(item.updated_at));
-                    mdChunks.push(`#### ${item.title} | Created at: \`${d} at ${t} UTC\``);
-                }
-                if (item.body != null) mdChunks.push(`${item.body}`);
-                mdChunks.push(`<div class="gab-issue-status">${item.state}</div>`);
-                mdChunks.push(`Comments: \`${item.comments}\``);
-                mdChunks.push('</div>')
+                const [d, t] = ToSplitTime(new Date(item.updated_at));
+                const [cd, ct] = ToSplitTime(new Date(item.created_at));
+                const bodyHtml = item.body ? `<p>${sanitizeString(item.body)}</p>` : '';
+                mdChunks.push(`<div class="gab-commit"><h3>${item.author_association} ${name} at <code>${repo_name}</code></h3><p>Issue updated <code>${d} at ${t} UTC</code> <a href="${item.html_url}"><code>ID: ${item.id}</code></a></p><h4>${sanitizeString(item.title)} | Created at: <code>${cd} at ${ct} UTC</code></h4>${bodyHtml}<div class="gab-issue-status">${item.state}</div><p>Comments: <code>${item.comments}</code></p></div>`);
                 issuesAdded++;
             }
             return mdChunks;
