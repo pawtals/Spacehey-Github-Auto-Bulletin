@@ -7,6 +7,10 @@ import Markdown from "./helpers/markdown.js";
 const spacehey = await Spacehey.create();
 const mdRenderer = new Markdown();
 
+// Load header and footer
+await mdRenderer.LoadHeader();
+await mdRenderer.LoadFooter();
+
 await Github.CommitHistory({
     user: "pawtals"
 }).then(md => md.forEach((line) => mdRenderer.AddLine(line)))
@@ -18,6 +22,6 @@ await Github.PullHistory({
 }).then(md => md.forEach((line) => mdRenderer.AddLine(line)))
 
 spacehey.PostBulletin({
-    title: "testing default css",
+    title: "footer",
     content: mdRenderer.Render(),
 })
